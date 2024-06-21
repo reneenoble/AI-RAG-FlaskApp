@@ -26,7 +26,7 @@ search_client = SearchClient(
     credential=AzureKeyCredential(AZURE_SEARCH_KEY),
 )
 
-def get_response(question, message_history[]):
+def get_response(question, message_history=[]):
     search_results = search_client.search(search_text=question)
     search_summary = " ".join(result["content"] for result in search_results)
     print(search_summary)
@@ -48,12 +48,9 @@ def get_response(question, message_history[]):
         model=MODEL_NAME,
         temperature=0.7,
         n=1,
-        messages=[
-            {"role": "system", "content": SYSTEM_MESSAGE},
-            {"role": "user", "content": question + "\nSources: " + search_summary},
-        ],
+        messages=messages,
     )
-    return response.choices[0].message.content, messages
+    return response.choices[0].message.content, message_history.append({"role": "user", "content": question})
 
 
 @app.route("/ask", methods=['GET'])
@@ -73,8 +70,8 @@ def ask_response():
     data = request.get_json()
     # Extract the 'messages' value from the JSON data
     question = data.get('question', "No question provided")
-    response = get_response(question)
-    return jsonify({"answer": response})
+    answer, message_history = get_response(question)
+    return jsonify({"answer": answer})
 
 
 @app.route("/chat", methods=['GET'])
@@ -94,10 +91,10 @@ def chat_response():
     data = request.get_json()
     # Extract the 'messages' value from the JSON data
     question = data.get('question', "No question provided")
-    messages = data.get('messages', [])
+    message_history = data.get('messages', [])
 
-    response = get_response(question, message_history=messages)
-    return jsonify({"answer": response})
+    answer, message_history = get_response(question, message_history)
+    return jsonify({"answer": answer, "messages": message_history})
 
 
 # create an index route
