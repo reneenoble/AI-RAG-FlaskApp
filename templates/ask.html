@@ -1,0 +1,48 @@
+<!doctype html>
+<head>
+	<title>AI RAG Workshop - Ask</title>
+	<link href="/static/styles.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+    <form action="" method="post" id="ask-form">
+        <input type="text" name="question" id="question" placeholder="Enter your question?" required />
+        <input type="button" value="Send" id="ask-send"/>
+    </form>
+
+    <div id="ask-output" class="output">
+
+    </div>
+</body>
+
+<script>
+    askSend = document.getElementById("ask-send");
+    output = document.getElementById("ask-output");
+    askSend.onclick = (e) => {
+        e.preventDefault()
+        const data = {
+            message: e.target.form[0].value
+        };
+
+        output.innerHTML = "Waiting..."
+
+        // Send the POST request using fetch
+        fetch("/contextless-message", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Success:", data)
+            output.innerHTML = data.resp
+        })
+        .catch((error) => {
+            console.error("Error:", error)
+            output.value = "Sorry, there was an error. Please refresh and try again."
+        });
+    }
+
+</script>

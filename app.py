@@ -101,6 +101,33 @@ def chat_response():
 @app.route('/')
 def home():
     return "Hello!"
+@app.get('/')
+def index():
+  return render_template('ask.html')
+
+@app.get('/ask')
+def ask():
+    # return render_template('hello.html', name=request.args.get('name'))
+  return render_template("ask.html")
+
+@app.get('/chat')
+def chat():
+   return render_template('chat.html')
+
+@app.route('/contextless-message', methods=['GET', 'POST'])
+def contextless_message():
+    msg = request.json['message']
+    return {"resp": f"Contextless reply to {msg}"}
+
+
+@app.route("/context-message", methods=["GET", "POST"])
+def context_message():
+    msg = request.json["message"]
+    context = request.json["context"]
+
+    reply = f"Context reply to {msg}"
+    context.append(reply)
+    return {"resp": reply, "context": context}
 
 
 @app.errorhandler(404)

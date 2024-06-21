@@ -1,0 +1,47 @@
+<!doctype html>
+<head>
+	<title>AI RAG Workshop - Chat</title>
+	<link href="/static/styles.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div id="chat-output" class="output"></div>
+
+    <form action="" method="post" id="chat-form">
+        <input type="text" name="question" id="question" placeholder="Enter your question?" required />
+        <input type="button" value="Send" id="chat-send"/>
+    </form>
+</body>
+
+<script>
+    askSend = document.getElementById("chat-send");
+    output = document.getElementById("chat-output");
+    current_context = []
+    askSend.onclick = (e) => {
+        e.preventDefault()
+        msg = e.target.form[0].value
+        current_context.push(msg)
+        const data = {
+            message: msg,
+            context: current_context
+        };
+
+        // Send the POST request using fetch
+        fetch("/context-message", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Success:", data)
+            output.innerHTML += "<div class='response'>" + data.resp + "</div>"
+        })
+        .catch((error) => {
+            console.error("Error:", error)
+            output.innerHTML += "<div class='response'>Sorry, there was an error. Please refresh and try again.</div>"
+        });
+    }
+
+</script>
