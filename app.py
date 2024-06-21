@@ -52,51 +52,6 @@ def get_response(question, message_history=[]):
     )
     return response.choices[0].message.content, message_history.append({"role": "user", "content": question})
 
-
-@app.route("/ask", methods=['GET'])
-def ask():
-    return """
-    <h1>ASK AI A question!</h1>
-    <form method="post" action="/ask">
-        <textarea name="question" placeholder="Ask a question"></textarea>
-        <button type="submit">Ask</button>
-    </form>
-    """
-
-
-@app.route("/ask", methods=["POST"])
-def ask_response():
-    # Get the question out of the json object
-    data = request.get_json()
-    # Extract the 'messages' value from the JSON data
-    question = data.get('question', "No question provided")
-    answer, message_history = get_response(question)
-    return jsonify({"answer": answer})
-
-
-@app.route("/chat", methods=['GET'])
-def chat():
-    return """
-    <h1>Chat with the AI</h1>
-    <form method="post" action="/chat">
-        <textarea name="question" placeholder="Ask a question"></textarea>
-        <button type="submit">Ask</button>
-    </form>
-    """
-
-
-@app.route("/chat", methods=["POST"])
-def chat_response():
-    # Get the question out of the json object
-    data = request.get_json()
-    # Extract the 'messages' value from the JSON data
-    question = data.get('question', "No question provided")
-    message_history = data.get('messages', [])
-
-    answer, message_history = get_response(question, message_history)
-    return jsonify({"answer": answer, "messages": message_history})
-
-
 # create an index route
 @app.route('/')
 def home():
@@ -116,18 +71,18 @@ def chat():
 
 @app.route('/contextless-message', methods=['GET', 'POST'])
 def contextless_message():
-    msg = request.json['message']
-    return {"resp": f"Contextless reply to {msg}"}
+    question = request.json['message']
+    resp = get_response(question)
+    return {"resp": resp}
 
 
 @app.route("/context-message", methods=["GET", "POST"])
 def context_message():
-    msg = request.json["message"]
+    question = request.json["message"]
     context = request.json["context"]
 
-    reply = f"Context reply to {msg}"
-    context.append(reply)
-    return {"resp": reply, "context": context}
+    resp, context = get_response(question, context)
+    return {"resp": resp, "context": context}
 
 
 @app.errorhandler(404)

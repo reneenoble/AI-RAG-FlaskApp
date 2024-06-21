@@ -15,15 +15,27 @@
 <script>
     askSend = document.getElementById("chat-send");
     output = document.getElementById("chat-output");
-    current_context = []
+    chatForm = document.getElementById("chat-form");
+    current_context = [];
+    chatForm.onsubmit = (e) => {
+        e.preventDefault()
+        console.log(e.target)
+        send_message(e.target)
+    }
     askSend.onclick = (e) => {
         e.preventDefault()
-        msg = e.target.form[0].value
-        current_context.push(msg)
+        send_message(e.target.form)
+    }
+
+    function send_message(f) {
+        msg = f[0].value
         const data = {
             message: msg,
             context: current_context
         };
+        f[0].value = ""
+
+        output.innerHTML += "<div class='question'>" + msg + "</div></br>"
 
         // Send the POST request using fetch
         fetch("/context-message", {
@@ -36,7 +48,7 @@
         .then((response) => response.json())
         .then((data) => {
             console.log("Success:", data)
-            output.innerHTML += "<div class='response'>" + data.resp + "</div>"
+            output.innerHTML += "<div class='response'>" + data.resp + "</div></br>"
         })
         .catch((error) => {
             console.error("Error:", error)
