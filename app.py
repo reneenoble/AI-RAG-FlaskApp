@@ -29,7 +29,6 @@ search_client = SearchClient(
 def get_response(question, message_history=[]):
     search_results = search_client.search(search_text=question)
     search_summary = " ".join(result["content"] for result in search_results)
-    print(search_summary)
     SYSTEM_MESSAGE = "You're a helpful assistant that must use provided sources"
 
     # Create a new message history if there isn't one
@@ -73,7 +72,7 @@ def chat():
 def contextless_message():
     question = request.json['message']
     resp = get_response(question)
-    return {"resp": resp}
+    return {"resp": resp[0]}
 
 
 @app.route("/context-message", methods=["GET", "POST"])
